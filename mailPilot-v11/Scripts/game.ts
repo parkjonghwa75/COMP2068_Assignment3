@@ -29,7 +29,7 @@ function preload(): void {
         { id: "cloud", src: "images/cloud_PNG16.png" },
         { id: "background", src: "images/reSize_background.png" },
         { id: "background2", src: "images/reSize_background.png" },
-        { id: "yay", src: "sounds/yay.ogg" }
+        { id: "sound1", src: "sounds/engine.ogg" }
     ]);
 }
 
@@ -72,6 +72,7 @@ class Plane {
 
     update() {
         this.image.y = stage.mouseY;
+        createjs.Sound.play('sound1', createjs.Sound.INTERRUPT_NONE, 0, 0, -1, 1);
     }
 }
 
