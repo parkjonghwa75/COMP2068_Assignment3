@@ -1,92 +1,209 @@
-﻿/// <reference path="constants.ts" />
-/// <reference path="managers/asset.ts" />
-/// <reference path="objects/cloud.ts" />
-/// <reference path="objects/island.ts" />
-/// <reference path="objects/ocean.ts" />
-/// <reference path="objects/plane.ts" />
-/// <reference path="objects/scoreboard.ts" />
-/// <reference path="objects/label.ts" />
-/// <reference path="objects/button.ts" />
-/// <reference path="managers/collision.ts" />
-/// <reference path="states/play.ts" />
-/// <reference path="states/menu.ts" />
-/// <reference path="states/gameover.ts" />
+﻿var stage: createjs.Stage;
+var queue;
 
-// Mail Pilot Version 11 - Added basic state machine structure - Added Button and Label classes
-// Changed online repo
+// Game Objects
+var plane: Plane;
+var bullet: Bullet;
+var background: Background;
+var background2: Background2;
 
-var stage: createjs.Stage;
-var game: createjs.Container;
+// Cloud Array
+var clouds = [];
 
-var ocean: objects.Ocean;
-var plane: objects.Plane;
-var island: objects.Island;
-var clouds = []; // Clouds array;
-var scoreboard: objects.Scoreboard;
+// Game Constants
+var CLOUD_NUM: number = 3;
 
-var collision: managers.Collision;
+// Scroll Speed
+var SCROLL_SPEED: number = 3;
 
-var tryAgain: objects.Button;
-var playButton: objects.Button;
+// Bullet Item Speed
+var BULLET_ITEM_SPEED: number = 10;
 
-var currentState: number;
-var currentStateFunction;
-
-// Preload function - Loads Assets and initializes game;
 function preload(): void {
-    managers.Assets.init();
-    managers.Assets.loader.addEventListener("complete", init);
+    queue = new createjs.LoadQueue();
+    queue.installPlugin(createjs.Sound);
+    queue.addEventListener("complete", init);
+    queue.loadManifest([
+        { id: "plane", src: "images/p_47222.png" },
+        { id: "bullet", src: "images/bullet.png" },
+        { id: "cloud", src: "images/cloud_PNG16.png" },
+        { id: "background", src: "images/reSize_background.png" },
+        { id: "background2", src: "images/reSize_background.png" },
+        { id: "yay", src: "sounds/yay.ogg" }
+    ]);
 }
 
-// init called after Assets have been loaded.
 function init(): void {
     stage = new createjs.Stage(document.getElementById("canvas"));
-    stage.enableMouseOver(30);
+    stage.enableMouseOver(20);
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", gameLoop);
-    optimizeForMobile();
-
-    currentState = constants.MENU_STATE;
-    changeState(currentState);
+    gameStart();
 }
 
-// Add touch support for mobile devices
-function optimizeForMobile() {
-    if (createjs.Touch.isSupported()) {
-        createjs.Touch.enable(stage);
-    }
-}
-
-// Game Loop
 function gameLoop(event): void {
-    currentStateFunction();
+    background.update();
+    background2.update();
+    bullet.update();
+    plane.update();
+
+    for (var count = 0; count < CLOUD_NUM; count++) {
+        clouds[count].update();
+    }
+
     stage.update();
 }
 
-function changeState(state: number): void {
-    // Launch Various "screens"
-    switch (state) {
-        case constants.MENU_STATE:
-            // instantiate menu screen
-            currentStateFunction = states.menuState;
-            states.menu();
-            break;
+// Plane Class
+class Plane {
+    image: createjs.Bitmap;
+    width: number;
+    height: number;
+    constructor() {
+        this.image = new createjs.Bitmap(queue.getResult("plane"));
+        this.width = this.image.getBounds().width;
+        this.height = this.image.getBounds().height;
+        this.image.regX = this.width * 0.5;
+        this.image.regY = this.height * 0.5;
+        this.image.x = 100;
 
-        case constants.PLAY_STATE:
-            // instantiate play screen
-            currentStateFunction = states.playState;
-            states.play();
-            break;
+        stage.addChild(this.image);
+    }
 
-        case constants.GAME_OVER_STATE:
-            currentStateFunction = states.gameOverState;
-            // instantiate game over screen
-            states.gameOver();
-            break;
+    update() {
+        this.image.y = stage.mouseY;
     }
 }
 
+// bullet Class
+class Bullet {
+    image: createjs.Bitmap;
+    width: number;
+    height: number;
+    dx: number;
+    probabilityBullet: number;
+
+    constructor() {
+        this.image = new createjs.Bitmap(queue.getResult("bullet"));
+        this.width = this.image.getBounds().width;
+        this.height = this.image.getBounds().height;
+        this.image.regX = this.width * 0.5;
+        this.image.regY = this.height * 0.5;
+        this.dx = BULLET_ITEM_SPEED;
+        stage.addChild(this.image);
+        this.reset();
+    }
+
+    reset() {
+        this.image.x = stage.canvas.width+1000;
+        this.image.y = Math.floor(Math.random() * stage.canvas.height);
+    }
+
+    update() {
+        this.image.x -= this.dx;
+        if (this.image.x <= -this.width-3000) {
+            this.reset();
+        }
+    }
+}
+
+// Cloud Class
+class Cloud {
+    image: createjs.Bitmap;
+    width: number;
+    height: number;
 
 
+    dx: number;
+    constructor() {
+        this.image = new createjs.Bitmap(queue.getResult("cloud"));
+        this.width = this.image.getBounds().width;
+        this.height = this.image.getBounds().height;
+        this.image.regX = this.width * 0.5;
+        this.image.regY = this.height * 0.5;
+        stage.addChild(this.image);
+        this.reset();
+    }
 
+    reset() {
+        this.image.x = 1000;
+        this.image.y = Math.floor(Math.random() * stage.canvas.height);
+        this.dx = Math.floor(Math.random() * 10 + 1);
+    }
 
+    update() {
+
+        this.image.x -= this.dx;
+        if (this.image.x <= -this.width) {
+            this.reset();
+        }
+    }
+}
+
+// Background Class
+class Background {
+    image: createjs.Bitmap;
+    width: number;
+    height: number;
+    dx: number;
+
+    constructor() {
+        this.image = new createjs.Bitmap(queue.getResult("background"));
+        this.width = this.image.getBounds().width;
+        this.height = this.image.getBounds().height;
+        this.dx = SCROLL_SPEED;
+        stage.addChild(this.image);
+        this.reset();
+    }
+
+    reset() {
+        this.image.x = 0;
+    }
+
+    update() {
+        this.image.x -= this.dx;
+        if (this.image.x <= -1275) {
+            this.image.x = 1275;
+        }
+    }
+}
+
+// Background2 Class
+class Background2 {
+    image: createjs.Bitmap;
+    width: number;
+    height: number;
+    dx: number;
+
+    constructor() {
+        this.image = new createjs.Bitmap(queue.getResult("background"));
+        this.width = this.image.getBounds().width;
+        this.height = this.image.getBounds().height;
+        this.dx = SCROLL_SPEED;
+        stage.addChild(this.image);
+        this.reset();
+    }
+
+    reset() {
+        this.image.x = 1275;
+    }
+
+    update() {
+        this.image.x -= this.dx;
+        if (this.image.x <= -1275) {
+            this.reset();
+        }
+    }
+}
+
+function gameStart(): void {
+
+    background = new Background();
+    background2 = new Background2();
+    bullet = new Bullet();
+    plane = new Plane();
+
+    for (var count = 0; count < CLOUD_NUM; count++) {
+        clouds[count] = new Cloud();
+    }
+}

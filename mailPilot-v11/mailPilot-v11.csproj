@@ -59,16 +59,28 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\images\1945.bmp" />
-    <Content Include="assets\images\atlas.png" />
-    <Content Include="assets\images\cloud.png" />
-    <Content Include="assets\images\island.png" />
-    <Content Include="assets\images\ocean.gif" />
-    <Content Include="assets\images\plane.png" />
-    <Content Include="assets\images\sideplane.gif" />
-    <Content Include="assets\sounds\yay.ogg" />
-    <Content Include="assets\sounds\thunder.ogg" />
-    <Content Include="assets\sounds\engine.ogg" />
+    <Content Include="images\1945.bmp" />
+    <Content Include="images\atlas.png" />
+    <Content Include="images\bullet.png" />
+    <Content Include="images\cloud.png" />
+    <Content Include="images\cloud_PNG16.png" />
+    <Content Include="images\island.png" />
+    <Content Include="images\ocean.gif" />
+    <Content Include="images\plane.png" />
+    <Content Include="images\p_47222.png" />
+    <Content Include="images\reSize_background.png" />
+    <Content Include="images\reSize_bullet.png" />
+    <Content Include="images\reSize_fbz-99g-fighterbomber.gif" />
+    <Content Include="images\reSize_p_47.png" />
+    <Content Include="images\reSize_vf1j_fighter.jpg" />
+    <Content Include="images\reSize_vf1j_fighter.png" />
+    <Content Include="images\sideplane.gif" />
+    <Content Include="sounds\Explosion.wav" />
+    <Content Include="sounds\Hit_Hurt.wav" />
+    <Content Include="sounds\Jump.wav" />
+    <Content Include="sounds\yay.ogg" />
+    <Content Include="sounds\thunder.ogg" />
+    <Content Include="sounds\engine.ogg" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -79,7 +91,7 @@
   <ItemGroup>
     <Content Include="css\app.css" />
     <Content Include="css\normalize.css" />
-    <Content Include="assets\images\loading.jpg" />
+    <Content Include="images\loading.jpg" />
     <Content Include="index.html" />
     <Content Include="packages.config" />
     <None Include="Scripts\lib\jquery-2.1.1.intellisense.js" />
@@ -105,26 +117,17 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="assets\" />
+    <Folder Include="Scripts\objects\" />
+  </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\constants.ts" />
     <TypeScriptCompile Include="Scripts\lib\createjs-lib.d.ts" />
     <TypeScriptCompile Include="Scripts\lib\easeljs.d.ts" />
     <TypeScriptCompile Include="Scripts\game.ts" />
-    <TypeScriptCompile Include="Scripts\managers\asset.ts" />
-    <TypeScriptCompile Include="Scripts\managers\collision.ts" />
-    <TypeScriptCompile Include="Scripts\objects\button.ts" />
-    <TypeScriptCompile Include="Scripts\objects\cloud.ts" />
-    <TypeScriptCompile Include="Scripts\objects\island.ts" />
-    <TypeScriptCompile Include="Scripts\objects\label.ts" />
-    <TypeScriptCompile Include="Scripts\objects\ocean.ts" />
-    <TypeScriptCompile Include="Scripts\objects\plane.ts" />
-    <TypeScriptCompile Include="Scripts\objects\scoreboard.ts" />
     <TypeScriptCompile Include="Scripts\lib\preloadjs.d.ts" />
     <TypeScriptCompile Include="Scripts\lib\soundjs.d.ts" />
-    <TypeScriptCompile Include="Scripts\states\gameover.ts" />
-    <TypeScriptCompile Include="Scripts\states\menu.ts" />
-    <TypeScriptCompile Include="Scripts\states\play.ts" />
     <TypeScriptCompile Include="Scripts\lib\tweenjs.d.ts" />
   </ItemGroup>
   <PropertyGroup>
