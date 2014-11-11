@@ -1,7 +1,12 @@
-﻿/// <reference path="managers/collision.ts" />
+﻿/// <reference path="managers/asset.ts" />
+/// <reference path="managers/collision.ts" />
+/// <reference path="states/gameover.ts" />
+/// <reference path="states/menu.ts" />
+/// <reference path="states/play.ts" />
 /// <reference path="constants.ts" />
 
 var stage: createjs.Stage;
+var game: createjs.Container;
 var queue;
 
 // Game Objects
@@ -21,6 +26,16 @@ var SCROLL_SPEED: number = 3;
 
 // Bullet Item Speed
 var BULLET_ITEM_SPEED: number = 10;
+
+var scoreboard: Scoreboard;
+
+var collision: managers.Collision;
+
+var tryAgain: Button;
+var playButton: Button;
+
+var currentState: number;
+var currentStateFunction;
 
 function preload(): void {
     queue = new createjs.LoadQueue();
@@ -43,61 +58,72 @@ function init(): void {
     stage.enableMouseOver(20);
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", gameLoop);
-    gameStart();
+    //gameStart();
+    
+    currentState = constants.MENU_STATE;
+    changeState(currentState);
 }
 
 function gameLoop(event): void {
-    background.update();
-    background2.update();
-    bullet.update();
-    plane.update();
-
-    for (var count = 0; count < CLOUD_NUM; count++) {
-        clouds[count].update();
-    }
-
+    currentStateFunction();
     stage.update();
 }
 
 // Plane Class
 class Plane {
     image: createjs.Bitmap;
+    stage: createjs.Stage;
+    game: createjs.Container;
     width: number;
     height: number;
-    constructor() {
+    engineSound: createjs.SoundInstance;
+
+    constructor(stage: createjs.Stage, game: createjs.Container) {
+        this.stage = stage;
+        this.game = game;
         this.image = new createjs.Bitmap(queue.getResult("plane"));
         this.width = this.image.getBounds().width;
         this.height = this.image.getBounds().height;
         this.image.regX = this.width * 0.5;
         this.image.regY = this.height * 0.5;
         this.image.x = 100;
-
-        stage.addChild(this.image);
+        
+        game.addChild(this.image);
+        this.engineSound = createjs.Sound.play('sound1', createjs.Sound.INTERRUPT_NONE, 0, 0, -1, 1);
     }
 
     update() {
         this.image.y = stage.mouseY;
-        createjs.Sound.play('sound1', createjs.Sound.INTERRUPT_NONE, 0, 0, -1, 1);
+        
+    }
+    destroy() {
+        this.engineSound.stop();
+        game.removeChild(this.image);
     }
 }
 
 // bullet Class
 class Bullet {
     image: createjs.Bitmap;
+    stage: createjs.Stage;
+    game: createjs.Container;
     width: number;
     height: number;
     dx: number;
     probabilityBullet: number;
 
-    constructor() {
+    constructor(stage: createjs.Stage, game: createjs.Container) {
+        this.stage = stage;
+        this.game = game;
         this.image = new createjs.Bitmap(queue.getResult("bullet"));
         this.width = this.image.getBounds().width;
         this.height = this.image.getBounds().height;
         this.image.regX = this.width * 0.5;
         this.image.regY = this.height * 0.5;
         this.dx = BULLET_ITEM_SPEED;
-        stage.addChild(this.image);
+       // stage.addChild(this.image);
         this.reset();
+        game.addChild(this.image);
     }
 
     reset() {
@@ -111,24 +137,32 @@ class Bullet {
             this.reset();
         }
     }
+    destroy() {
+        game.removeChild(this.image);
+    }
 }
 
 // Cloud Class
 class Cloud {
     image: createjs.Bitmap;
+    stage: createjs.Stage;
+    game: createjs.Container;
     width: number;
     height: number;
 
 
     dx: number;
-    constructor() {
+    constructor(stage: createjs.Stage, game: createjs.Container) {
+        this.stage = stage;
+        this.game = game;
         this.image = new createjs.Bitmap(queue.getResult("cloud"));
         this.width = this.image.getBounds().width;
         this.height = this.image.getBounds().height;
         this.image.regX = this.width * 0.5;
         this.image.regY = this.height * 0.5;
-        stage.addChild(this.image);
+        //stage.addChild(this.image);
         this.reset();
+        game.addChild(this.image);
     }
 
     reset() {
@@ -144,22 +178,30 @@ class Cloud {
             this.reset();
         }
     }
+    destroy() {
+        game.removeChild(this.image);
+    }
 }
 
 // Background Class
 class Background {
     image: createjs.Bitmap;
+    stage: createjs.Stage;
+    game: createjs.Container;
     width: number;
     height: number;
     dx: number;
 
-    constructor() {
+    constructor(stage: createjs.Stage, game: createjs.Container) {
+        this.stage = stage;
+        this.game = game;
         this.image = new createjs.Bitmap(queue.getResult("background"));
         this.width = this.image.getBounds().width;
         this.height = this.image.getBounds().height;
         this.dx = SCROLL_SPEED;
         stage.addChild(this.image);
         this.reset();
+        game.addChild(this.image);
     }
 
     reset() {
@@ -177,17 +219,22 @@ class Background {
 // Background2 Class
 class Background2 {
     image: createjs.Bitmap;
+    stage: createjs.Stage;
+    game: createjs.Container;
     width: number;
     height: number;
     dx: number;
 
-    constructor() {
+    constructor(stage: createjs.Stage, game: createjs.Container) {
+        this.stage = stage;
+        this.game = game;
         this.image = new createjs.Bitmap(queue.getResult("background"));
         this.width = this.image.getBounds().width;
         this.height = this.image.getBounds().height;
         this.dx = SCROLL_SPEED;
         stage.addChild(this.image);
         this.reset();
+        game.addChild(this.image);
     }
 
     reset() {
@@ -202,17 +249,6 @@ class Background2 {
     }
 }
 
-function gameStart(): void {
-
-    background = new Background();
-    background2 = new Background2();
-    bullet = new Bullet();
-    plane = new Plane();
-
-    for (var count = 0; count < CLOUD_NUM; count++) {
-        clouds[count] = new Cloud();
-    }
-}
 
 class Scoreboard {
     stage: createjs.Stage;
@@ -243,5 +279,64 @@ class Scoreboard {
 
     destroy() {
         stage.removeChild(this.label);
+    }
+}
+
+
+class Button extends createjs.Sprite {
+    constructor(x: number, y: number, buttonIDString: string) {
+        super(managers.Assets.atlas, buttonIDString);
+        this.regX = this.getBounds().width / 2;
+        this.regY = this.getBounds().height / 2;
+        this.x = x;
+        this.y = y;
+        this.setButtonListeners();
+    }
+
+    setButtonListeners() {
+        this.cursor = 'pointer';
+        this.on('rollover', this.onButtonOver);
+        this.on('rollout', this.onButtonOut);
+    }
+
+    onButtonOver() {
+        this.alpha = 0.8;
+    }
+
+    onButtonOut() {
+        this.alpha = 1;
+    }
+}
+
+function changeState(state: number): void {
+    // Launch Various "screens"
+    switch (state) {
+        case constants.MENU_STATE:
+            // instantiate menu screen
+            currentStateFunction = states.menuState;
+            states.menu();
+            break;
+
+        case constants.PLAY_STATE:
+            // instantiate play screen
+            currentStateFunction = states.playState;
+            states.play();
+            break;
+
+        case constants.GAME_OVER_STATE:
+            currentStateFunction = states.gameOverState;
+            // instantiate game over screen
+            states.gameOver();
+            break;
+    }
+}
+
+class Label extends createjs.Text {
+    constructor(x: number, y: number, labelText: string) {
+        super(labelText, constants.LABEL_FONT, constants.LABEL_COLOUR);
+        this.regX = this.getBounds().width / 2;
+        this.regY = this.getBounds().height / 2;
+        this.x = x;
+        this.y = y;
     }
 }
