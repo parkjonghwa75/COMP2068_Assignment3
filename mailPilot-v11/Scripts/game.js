@@ -1,4 +1,6 @@
-﻿var stage;
+﻿/// <reference path="managers/collision.ts" />
+/// <reference path="constants.ts" />
+var stage;
 var queue;
 
 // Game Objects
@@ -29,7 +31,9 @@ function preload() {
         { id: "cloud", src: "images/cloud_PNG16.png" },
         { id: "background", src: "images/reSize_background.png" },
         { id: "background2", src: "images/reSize_background.png" },
-        { id: "sound1", src: "sounds/engine.ogg" }
+        { id: "sound1", src: "sounds/engine.ogg" },
+        { id: "bulletGet", src: "sounds/Explosion.wav" },
+        { id: "cloudHit", src: "sounds/Hit_Hurt.wav" }
     ]);
 }
 
@@ -181,4 +185,29 @@ function gameStart() {
         clouds[count] = new Cloud();
     }
 }
+
+var Scoreboard = (function () {
+    function Scoreboard(stage, game) {
+        this.labelText = "";
+        this.stage = stage;
+        this.game = game;
+        this.lives = constants.PLANE_LIVES;
+        this.score = 0;
+        this.label = new createjs.Text(this.labelText, constants.LABEL_FONT, constants.LABEL_COLOUR);
+        this.update();
+        this.width = this.label.getBounds().width;
+        this.height = this.label.getBounds().height;
+
+        game.addChild(this.label);
+    }
+    Scoreboard.prototype.update = function () {
+        this.labelText = "Lives: " + this.lives.toString() + " Score: " + this.score.toString();
+        this.label.text = this.labelText;
+    };
+
+    Scoreboard.prototype.destroy = function () {
+        stage.removeChild(this.label);
+    };
+    return Scoreboard;
+})();
 //# sourceMappingURL=game.js.map

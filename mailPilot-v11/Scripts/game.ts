@@ -1,4 +1,7 @@
-﻿var stage: createjs.Stage;
+﻿/// <reference path="managers/collision.ts" />
+/// <reference path="constants.ts" />
+
+var stage: createjs.Stage;
 var queue;
 
 // Game Objects
@@ -29,7 +32,9 @@ function preload(): void {
         { id: "cloud", src: "images/cloud_PNG16.png" },
         { id: "background", src: "images/reSize_background.png" },
         { id: "background2", src: "images/reSize_background.png" },
-        { id: "sound1", src: "sounds/engine.ogg" }
+        { id: "sound1", src: "sounds/engine.ogg" },
+        { id: "bulletGet", src: "sounds/Explosion.wav" },
+        { id: "cloudHit", src: "sounds/Hit_Hurt.wav" }
     ]);
 }
 
@@ -206,5 +211,37 @@ function gameStart(): void {
 
     for (var count = 0; count < CLOUD_NUM; count++) {
         clouds[count] = new Cloud();
+    }
+}
+
+class Scoreboard {
+    stage: createjs.Stage;
+    game: createjs.Container;
+    lives: number;
+    score: number;
+    label: createjs.Text;
+    labelText: string = "";
+    width: number;
+    height: number;
+    constructor(stage: createjs.Stage, game: createjs.Container) {
+        this.stage = stage;
+        this.game = game;
+        this.lives = constants.PLANE_LIVES;
+        this.score = 0;
+        this.label = new createjs.Text(this.labelText, constants.LABEL_FONT, constants.LABEL_COLOUR);
+        this.update();
+        this.width = this.label.getBounds().width;
+        this.height = this.label.getBounds().height;
+
+        game.addChild(this.label);
+    }
+
+    update() {
+        this.labelText = "Lives: " + this.lives.toString() + " Score: " + this.score.toString();
+        this.label.text = this.labelText;
+    }
+
+    destroy() {
+        stage.removeChild(this.label);
     }
 }
